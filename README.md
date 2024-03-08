@@ -2,10 +2,12 @@
 A project for extracting questions related different tags from StackOverflow
 
 ## Installation
-First, ensure you have html2text installed in your Python environment. If not, you can install it using pip:
+ensure you have html2text, bs4 installed in your Python environment. If not, you can install them using pip:
 
 ```
 pip install html2text
+pip install bs4
+pip install requests sqlite3
 ```
 ## Run
 Run the `main.py` file to run the program. 
