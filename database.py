@@ -21,6 +21,16 @@ def create_tables(conn):
         has_synonyms BOOLEAN NOT NULL
     )
     ''')
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS tag_synonyms (
+        from_tag TEXT NOT NULL,
+        to_tag TEXT NOT NULL,
+        creation_date INTEGER,
+        last_applied_date INTEGER,
+        applied_count INTEGER,
+        PRIMARY KEY (from_tag, to_tag)
+    )
+    ''')
     conn.commit()
 
 def insert_tag_data(conn, name, count, has_synonyms):
@@ -34,6 +44,16 @@ def insert_tag_data(conn, name, count, has_synonyms):
     ''', (name, count, has_synonyms))
     conn.commit()
 
-
+def insert_tag_synonym_data(conn, from_tag, to_tag, creation_date, last_applied_date, applied_count):
+    """
+    Inserts a tag synonym into the SQLite database.
+    """
+    cursor = conn.cursor()
+    cursor.execute('''
+    INSERT INTO tag_synonyms (from_tag, to_tag, creation_date, last_applied_date, applied_count)
+    VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT(from_tag, to_tag) DO UPDATE SET creation_date = excluded.creation_date, last_applied_date = excluded.last_applied_date, applied_count = excluded.applied_count
+    ''', (from_tag, to_tag, creation_date, last_applied_date, applied_count))
+    conn.commit()
 
 

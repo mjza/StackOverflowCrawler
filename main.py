@@ -1,4 +1,4 @@
-from api import fetch_questions, fetch_popular_tags
+from api import fetch_questions, fetch_popular_tags, fetch_all_tag_synonyms
 
 def main():
     '''
@@ -10,7 +10,9 @@ def main():
         print(f"{question_url}\n----\n{title}\n----\n{question_md}\n")
     '''    
     # Call the function to start fetching and storing tag data
-    fetch_popular_tags()
+    #fetch_popular_tags()
+    
+    fetch_all_tag_synonyms()
 
 if __name__ == '__main__':
     main()
