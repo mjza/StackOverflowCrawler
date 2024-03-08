@@ -37,7 +37,7 @@ def fetch_popular_tags():
     conn = open_connection()
 
     create_tables(conn)
-
+    sleep = 10
     while has_more:
         response = requests.get(base_url, params=params)
         if response.status_code == 200:
@@ -54,7 +54,12 @@ def fetch_popular_tags():
             has_more = data['has_more']
             print(f"The page {params['page']} has been done.")
             params['page'] += 1
-            time.sleep(10)
+            if sleep > 10:
+                sleep /= 2
+            time.sleep(sleep)
         else:
-            break
+            print(response.status_code, response.text)
+            sleep *= 2
+            time.sleep(sleep)
+            
     close_connection(conn)
