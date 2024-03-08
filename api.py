@@ -83,8 +83,8 @@ def fetch_popular_tags():
             for item in data['items']:
                 # Extract relevant data
                 name = item['name']
-                count = item['count']
-                has_synonyms = item['has_synonyms']
+                count = item.get('count', 0)
+                has_synonyms = item.get('has_synonyms', False)
                 
                 # Insert data into the database
                 insert_tag_data(conn, name, count, has_synonyms)
@@ -126,9 +126,9 @@ def fetch_all_tag_synonyms():
                 # Extract relevant data
                 from_tag = item['from_tag']
                 to_tag = item['to_tag']
-                creation_date = item['creation_date']
-                last_applied_date = item['last_applied_date']
-                applied_count = item['applied_count']
+                creation_date = item.get('creation_date', None)
+                last_applied_date = item.get('last_applied_date', None)
+                applied_count = item.get('applied_count', 0)
                 
                 # Insert synonym data into the database
                 insert_tag_synonym_data(conn, from_tag, to_tag, creation_date, last_applied_date, applied_count)
