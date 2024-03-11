@@ -29,7 +29,8 @@ def main():
         print("Available commands:")
         print("1. Fetch popular tags")
         print("2. Fetch tag synonyms")
-        print(f"3. Exit{reset}")
+        print("3. Fetch questions")
+        print(f"4. Exit{reset}")
         command = input(f"{blue}Enter a command number: {reset}").strip()
 
         if command == "1":
@@ -41,6 +42,14 @@ def main():
             fetch_all_tag_synonyms()
             print(f"{green}Successfully fetched all tag synonyms.{reset}")
         elif command == "3":
+            tags_input = input(f"{blue}Enter some tags (separated by commas): {reset}").strip()
+            tags = tags_input.split(',')
+            # Trim whitespace from each tag
+            tags = [tag.strip() for tag in tags]
+            print(f"{green}Fetching all questions for tags: {tags}{reset}")
+            fetch_questions(tags, 2, 2)
+            print(f"{green}Successfully fetched all questions for the provided tags.{reset}")    
+        elif command == "4":
             print(f"{green}Exiting the application. Goodbye!{reset}")
             running = False
         else:

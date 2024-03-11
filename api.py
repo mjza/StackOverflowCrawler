@@ -1,86 +1,87 @@
 import requests
-from database import open_connection, close_connection, create_tables, insert_tag_data, insert_tag_synonym_data
+from database import open_connection, close_connection, create_tables, insert_tag_data, insert_tag_synonym_data, insert_user_data, insert_question_data
 from config import BASE_URL, PARAMS_BASE, HEADERS
 from utils import extract_question_details
 import time
 
-def fetch_questions(tags, pages=10):
+def fetch_questions(tags, first_page=1, last_page=0):
     """
-    Fetches questions for given tags and handles pagination.
+    Fetches questions for given tags, handles pagination, and inserts data into the database.
     """
     base_url = BASE_URL + 'questions'
-
-    results = []
-    for page in range(1, pages + 1):
-        params = PARAMS_BASE.copy()
-        params['sort'] = 'activity'
-        params['tagged'] = ';'.join(tags)
-        params['page'] = page
-
-        response = requests.get(base_url, params=params)
-        questions = response.json()
-
-        for question in questions.get('items', []):
-            question_url = question['link']
-            url, title, body = extract_question_details(question_url, HEADERS)
-            results.append((url, title, body))
-    return results
-
-def fetch_popular_tags():
-    base_url = BASE_URL + 'tags'
-
     params = PARAMS_BASE.copy()
-    params['sort'] = 'popular'    
+    params.update({
+        'sort': 'activity',
+        'tagged': ';'.join(tags),
+        'page': first_page
+    })
+    
+    conn = open_connection()
+    create_tables(conn)
 
     has_more = True
-
-    conn = open_connection()
-
-    create_tables(conn)
     sleep = 1
+    
     while has_more:
         response = requests.get(base_url, params=params)
         if response.status_code == 200:
             data = response.json()
-            for item in data['items']:
-                # Extract relevant data
-                name = item['name']
-                count = item['count']
-                has_synonyms = item['has_synonyms']
+            for item in data['items']:   
+                owner = item.get('owner', {})
+                # Fallback to 0 if 'account_id' or 'user_id' is not present
+                user_type = owner.get('user_type', '')
+                if user_type == 'registered' :
+                    # Extracting remaining owner data, with default values where applicable
+                    user_data = (
+                        owner.get('account_id', 0), owner.get('reputation', 0),
+                        owner.get('user_id', 0), owner.get('user_type', ''),
+                        owner.get('accept_rate', 0), owner.get('profile_image', ''),
+                        owner.get('display_name', ''), owner.get('link', '')
+                    )
+                    insert_user_data(conn, *user_data)
                 
-                # Insert data into the database
-                insert_tag_data(conn, name, count, has_synonyms)
+                question_id = item.get('question_id', 0)
+                link = item.get('link', None)    
+                
+                title, body = extract_question_details(link, HEADERS)
+                
+                error = False
+                if title != item.get('title', '') and title == "Error":
+                    error = True               
+                
+                if question_id != 0:
+                    # Insert question data into the questions table
+                    question_data = (
+                        question_id, item.get('title', title), ",".join(item.get('tags', '')), owner.get('account_id', 0), item.get('is_answered', False), 
+                        item.get('view_count', 0), item.get('bounty_amount', 0), item.get('bounty_closes_date', None), item.get('answer_count',0), item.get('score', 0),
+                        item.get('last_activity_date', 0), item.get('creation_date', 0), item.get('last_edit_date', None), item.get('content_license', None), link, body, error
+                    )
+                    insert_question_data(conn, *question_data)
             
-            has_more = data['has_more']
-            print(f"The page {params['page']} has been done.")
+            print(f"Page {params['page']} processed.")
+            
+            has_more = data['has_more']            
             params['page'] += 1
-            if sleep > 1:
-                sleep /= 2
-            time.sleep(sleep)
-        elif response.status_code == 502:
-            print(f"Failed to fetch data: HTTP {response.status_code}, retrying in {sleep} seconds...")
-            sleep *= 2
-            if sleep > 60:  # Prevent sleep time from becoming excessively long
-                sleep = 60
+            if(last_page != 0 and params['page'] > last_page):
+                break            
+            sleep = max(sleep / 2, 1)
             time.sleep(sleep)
         else:
-            print(response.status_code, response.text)    
-            break     
-            
-    close_connection(conn)
+            print(f"Failed to fetch data: HTTP {response.status_code}, retrying in {sleep} seconds...")
+            sleep = min(sleep * 2, 60)
+            time.sleep(sleep)            
     
 def fetch_popular_tags():
     base_url = BASE_URL + 'tags'
 
     params = PARAMS_BASE.copy()
-    params['sort'] = 'popular'    
-
-    has_more = True
+    params['sort'] = 'popular'     
 
     conn = open_connection()
-
     create_tables(conn)
-    sleep = 10
+    
+    has_more = True
+    sleep = 1
     while has_more:
         response = requests.get(base_url, params=params)
         if response.status_code == 200:
@@ -97,14 +98,11 @@ def fetch_popular_tags():
             has_more = data['has_more']
             print(f"The page {params['page']} has been done.")
             params['page'] += 1
-            if sleep > 1:
-                sleep /= 2
+            sleep = max(sleep / 2, 1)
             time.sleep(sleep)
         elif response.status_code == 502:
             print(f"Failed to fetch data: HTTP {response.status_code}, retrying in {sleep} seconds...")
-            sleep *= 2
-            if sleep > 60:  # Prevent sleep time from becoming excessively long
-                sleep = 60
+            sleep = min(sleep * 2, 60)
             time.sleep(sleep)
         else:
             print(response.status_code, response.text)    
@@ -141,14 +139,11 @@ def fetch_all_tag_synonyms():
             has_more = data['has_more']
             print(f"The page {params['page']} has been done.")
             params['page'] += 1
-            if sleep > 1:  
-                sleep /= 2
+            sleep = max(sleep / 2, 1)
             time.sleep(sleep)
         elif response.status_code == 502:
             print(f"Failed to fetch data: HTTP {response.status_code}, retrying in {sleep} seconds...")
-            sleep *= 2
-            if sleep > 60:  # Prevent sleep time from becoming excessively long
-                sleep = 60
+            sleep = min(sleep * 2, 60)
             time.sleep(sleep)
         else:
             print(response.status_code, response.text)    
