@@ -8,7 +8,7 @@ ensure you have html2text, bs4 installed in your Python environment. If not, you
 pip install html2text
 pip install bs4
 pip install python-dotenv
-
+pip install colored
 ```
 ## Run
 Run the `main.py` file to run the program. 
