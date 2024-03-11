@@ -47,7 +47,7 @@ def main():
             # Trim whitespace from each tag
             tags = [tag.strip() for tag in tags]
             print(f"{green}Fetching all questions for tags: {tags}{reset}")
-            fetch_questions(tags, 2, 2)
+            fetch_questions(tags, 1, 0)
             print(f"{green}Successfully fetched all questions for the provided tags.{reset}")    
         elif command == "4":
             print(f"{green}Exiting the application. Goodbye!{reset}")

@@ -37,11 +37,11 @@ def create_tables(conn):
     CREATE TABLE IF NOT EXISTS users (
         account_id INTEGER PRIMARY KEY,
         reputation INTEGER,
-        user_id INTEGER NOT NULL,
+        user_id INTEGER,
         user_type TEXT,
         accept_rate INTEGER,
         profile_image TEXT,
-        display_name TEXT NOT NULL,
+        display_name TEXT,
         link TEXT
     )
     ''')
@@ -64,6 +64,22 @@ def create_tables(conn):
         content_license TEXT,
         link TEXT NOT NULL,
         body TEXT NULL,
+        error BOOLEAN
+    )
+    ''')
+    
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS answers (
+        answer_id INTEGER PRIMARY KEY,
+        question_id INTEGER NOT NULL,
+        owner_id INTEGER,
+        is_accepted BOOLEAN,
+        score INTEGER,
+        last_activity_date INTEGER,
+        last_edit_date INTEGER,
+        creation_date INTEGER,
+        content_license TEXT,
+        body TEXT,
         error BOOLEAN
     )
     ''')
@@ -147,3 +163,27 @@ def insert_question_data(conn, question_id, title, tags, owner_id, is_answered, 
     ''', 
     (question_id, title, tags, owner_id, is_answered, view_count, bounty_amount, bounty_closes_date, answer_count, score, last_activity_date, creation_date, last_edit_date, content_license, link, body, error))
     conn.commit()
+
+def insert_answer_data(conn, answer_id, question_id, owner_id, is_accepted, score, last_activity_date, last_edit_date, creation_date, content_license, body, error):
+    """
+    Inserts or updates answer data into the SQLite database.
+    """
+    cursor = conn.cursor()
+    cursor.execute('''
+    INSERT INTO answers (answer_id, question_id, owner_id, is_accepted, score, last_activity_date, last_edit_date, creation_date, content_license, body, error) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(answer_id) DO UPDATE SET 
+        question_id = excluded.question_id,
+        owner_id = excluded.owner_id,
+        is_accepted = excluded.is_accepted,
+        score = excluded.score,
+        last_activity_date = excluded.last_activity_date,
+        last_edit_date = excluded.last_edit_date,
+        creation_date = excluded.creation_date,
+        content_license = excluded.content_license,
+        body = excluded.body,
+        error = excluded.error
+    ''', 
+    (answer_id, question_id, owner_id, is_accepted, score, last_activity_date, last_edit_date, creation_date, content_license, body, error))
+    conn.commit()
+    
