@@ -112,10 +112,11 @@ def insert_tag_data(conn, name, count, has_synonyms):
     """
     cursor = conn.cursor()
     cursor.execute(f'''
-    INSERT INTO tags (name, count, has_synonyms) VALUES ({PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER})
+    INSERT INTO tags (name, count, has_synonyms) 
+    VALUES ({PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER})
     ON CONFLICT(name) DO UPDATE SET 
-        count = excluded.count, 
-        has_synonyms = excluded.has_synonyms
+        count = EXCLUDED.count, 
+        has_synonyms = EXCLUDED.has_synonyms
     ''', 
     (name, count, has_synonyms))
     conn.commit()
@@ -129,9 +130,9 @@ def insert_tag_synonym_data(conn, from_tag, to_tag, creation_date, last_applied_
     INSERT INTO tag_synonyms (from_tag, to_tag, creation_date, last_applied_date, applied_count)
     VALUES ({PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER})
     ON CONFLICT(from_tag, to_tag) DO UPDATE SET 
-        creation_date = excluded.creation_date, 
-        last_applied_date = excluded.last_applied_date, 
-        applied_count = excluded.applied_count
+        creation_date = EXCLUDED.creation_date, 
+        last_applied_date = EXCLUDED.last_applied_date, 
+        applied_count = EXCLUDED.applied_count
     ''', 
     (from_tag, to_tag, creation_date, last_applied_date, applied_count))
     conn.commit()
@@ -142,15 +143,16 @@ def insert_user_data(conn, account_id, reputation, user_id, user_type, accept_ra
     """
     cursor = conn.cursor()
     cursor.execute(f'''
-    INSERT INTO users (account_id, reputation, user_id, user_type, accept_rate, profile_image, display_name, link) VALUES ({PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER})
+    INSERT INTO users (account_id, reputation, user_id, user_type, accept_rate, profile_image, display_name, link) 
+    VALUES ({PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER})
     ON CONFLICT(account_id) DO UPDATE SET 
-        reputation = excluded.reputation, 
-        user_id = excluded.user_id, 
-        user_type = excluded.user_type, 
-        accept_rate = excluded.accept_rate, 
-        profile_image = excluded.profile_image, 
-        display_name = excluded.display_name, 
-        link = excluded.link
+        reputation = EXCLUDED.reputation, 
+        user_id = EXCLUDED.user_id, 
+        user_type = EXCLUDED.user_type, 
+        accept_rate = EXCLUDED.accept_rate, 
+        profile_image = EXCLUDED.profile_image, 
+        display_name = EXCLUDED.display_name, 
+        link = EXCLUDED.link
     ''', 
     (account_id, reputation, user_id, user_type, accept_rate, profile_image, display_name, link))
     conn.commit()
@@ -164,22 +166,22 @@ def insert_question_data(conn, question_id, title, tags, owner_id, is_answered, 
     INSERT INTO questions (question_id, title, tags, owner_id, is_answered, view_count, bounty_amount, bounty_closes_date, answer_count, score, last_activity_date, creation_date, last_edit_date, content_license, link, body, error) 
     VALUES ({PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER})
     ON CONFLICT(question_id) DO UPDATE SET 
-        title = excluded.title, 
-        tags = excluded.tags, 
-        owner_id = excluded.owner_id, 
-        is_answered = excluded.is_answered, 
-        view_count = excluded.view_count, 
-        bounty_amount = excluded.bounty_amount, 
-        bounty_closes_date = excluded.bounty_closes_date, 
-        answer_count = excluded.answer_count, 
-        score = excluded.score, 
-        last_activity_date = excluded.last_activity_date, 
-        creation_date = excluded.creation_date, 
-        last_edit_date = excluded.last_edit_date, 
-        content_license = excluded.content_license, 
-        link = excluded.link,
-        body = excluded.body,
-        error = excluded.error
+        title = EXCLUDED.title, 
+        tags = EXCLUDED.tags, 
+        owner_id = EXCLUDED.owner_id, 
+        is_answered = EXCLUDED.is_answered, 
+        view_count = EXCLUDED.view_count, 
+        bounty_amount = EXCLUDED.bounty_amount, 
+        bounty_closes_date = EXCLUDED.bounty_closes_date, 
+        answer_count = EXCLUDED.answer_count, 
+        score = EXCLUDED.score, 
+        last_activity_date = EXCLUDED.last_activity_date, 
+        creation_date = EXCLUDED.creation_date, 
+        last_edit_date = EXCLUDED.last_edit_date, 
+        content_license = EXCLUDED.content_license, 
+        link = EXCLUDED.link,
+        body = EXCLUDED.body,
+        error = EXCLUDED.error
     ''', 
     (question_id, title, tags, owner_id, is_answered, view_count, bounty_amount, bounty_closes_date, answer_count, score, last_activity_date, creation_date, last_edit_date, content_license, link, body, error))
     conn.commit()
@@ -193,16 +195,16 @@ def insert_answer_data(conn, answer_id, question_id, owner_id, is_accepted, scor
     INSERT INTO answers (answer_id, question_id, owner_id, is_accepted, score, last_activity_date, last_edit_date, creation_date, content_license, body, error) 
     VALUES ({PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER})
     ON CONFLICT(answer_id) DO UPDATE SET 
-        question_id = excluded.question_id,
-        owner_id = excluded.owner_id,
-        is_accepted = excluded.is_accepted,
-        score = excluded.score,
-        last_activity_date = excluded.last_activity_date,
-        last_edit_date = excluded.last_edit_date,
-        creation_date = excluded.creation_date,
-        content_license = excluded.content_license,
-        body = excluded.body,
-        error = excluded.error
+        question_id = EXCLUDED.question_id,
+        owner_id = EXCLUDED.owner_id,
+        is_accepted = EXCLUDED.is_accepted,
+        score = EXCLUDED.score,
+        last_activity_date = EXCLUDED.last_activity_date,
+        last_edit_date = EXCLUDED.last_edit_date,
+        creation_date = EXCLUDED.creation_date,
+        content_license = EXCLUDED.content_license,
+        body = EXCLUDED.body,
+        error = EXCLUDED.error
     ''', 
     (answer_id, question_id, owner_id, is_accepted, score, last_activity_date, last_edit_date, creation_date, content_license, body, error))
     conn.commit()
