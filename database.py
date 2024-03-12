@@ -209,3 +209,40 @@ def insert_answer_data(conn, answer_id, question_id, owner_id, is_accepted, scor
     (answer_id, question_id, owner_id, is_accepted, score, last_activity_date, last_edit_date, creation_date, content_license, body, error))
     conn.commit()
     
+def get_nonexistent_question_ids(conn, question_ids):
+    """
+    Returns the IDs from question_ids that are not found in the questions table.
+    """
+
+    comma_separated_ids = ', '.join(map(str, question_ids))
+    
+    cursor = conn.cursor()
+    query = f"SELECT question_id FROM questions WHERE question_id IN ({comma_separated_ids})"
+    cursor.execute(query)
+    
+    # Fetch all existing question_ids from the query result
+    existing_question_ids = [row[0] for row in cursor.fetchall()]
+
+    # Determine which of the provided question_ids are not found in the existing_question_ids
+    nonexistent_question_ids = [question_id for question_id in question_ids if question_id not in existing_question_ids]
+    
+    return nonexistent_question_ids
+
+def get_nonexistent_answer_ids(conn, answer_ids):
+    """
+    Returns the IDs from answer_ids that are not found in the answers table.
+    """
+
+    comma_separated_ids = ', '.join(map(str, answer_ids))
+    
+    cursor = conn.cursor()
+    query = f"SELECT answer_id FROM answers WHERE answer_id IN ({comma_separated_ids})"
+    cursor.execute(query)
+    
+    # Fetch all existing answer_ids from the query result
+    existing_answer_ids = [row[0] for row in cursor.fetchall()]
+
+    # Determine which of the provided answer_ids are not found in the existing_answer_ids
+    nonexistent_answer_ids = [answer_id for answer_id in answer_ids if answer_id not in existing_answer_ids]
+    
+    return nonexistent_answer_ids
