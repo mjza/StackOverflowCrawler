@@ -62,7 +62,7 @@ def fetch_questions(tags, first_page=1, last_page=0):
                     if(answer_count > 0):
                         fetch_answers(question_id, answers)
             
-            print(f"Page {params['page']} of question for the tags {tags} has been processed.")
+            print(f"Page {params['page']} of questions for the tags {tags} has been processed.")
             
             has_more = data['has_more']            
             params['page'] += 1

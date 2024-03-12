@@ -1,16 +1,36 @@
-import requests
+import os
 import sqlite3
+import psycopg2
+
+DBMS = os.getenv('DBMS')
+if DBMS == 'SQLITE':
+    PLACE_HOLDER = "?"
+elif DBMS == 'POSTGRES':
+    PLACE_HOLDER = "%s"
+else:
+    raise ValueError("Unsupported DBMS")
 
 def open_connection():
-    # Defines and returns the database connection
-    conn = sqlite3.connect('./db/stackoverflow_tags.db')
+    if DBMS == 'SQLITE':
+        conn = sqlite3.connect(os.getenv('DB_PATH'))
+    elif DBMS == 'POSTGRES':
+        conn = psycopg2.connect(
+            dbname=os.getenv('DB_NAME'),
+            user=os.getenv('DB_USER'),
+            password=os.getenv('DB_PASSWORD'),
+            host=os.getenv('DB_HOST'),
+            port=os.getenv('DB_PORT')
+        )
+    else:
+        raise ValueError("Unsupported DBMS")
+
     return conn
 
 def close_connection(conn):
     conn.commit()
     # Close the database connection
     conn.close()
-
+    
 def create_tables(conn):
     cursor = conn.cursor()
     # Create the tags table
@@ -84,15 +104,15 @@ def create_tables(conn):
     )
     ''')
     
-    conn.commit()
+    conn.commit() 
 
 def insert_tag_data(conn, name, count, has_synonyms):
     """
     Inserts tag data into the SQLite database.
     """
     cursor = conn.cursor()
-    cursor.execute('''
-    INSERT INTO tags (name, count, has_synonyms) VALUES (?, ?, ?)
+    cursor.execute(f'''
+    INSERT INTO tags (name, count, has_synonyms) VALUES ({PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER})
     ON CONFLICT(name) DO UPDATE SET 
         count = excluded.count, 
         has_synonyms = excluded.has_synonyms
@@ -103,11 +123,11 @@ def insert_tag_data(conn, name, count, has_synonyms):
 def insert_tag_synonym_data(conn, from_tag, to_tag, creation_date, last_applied_date, applied_count):
     """
     Inserts a tag synonym into the SQLite database.
-    """
+    """  
     cursor = conn.cursor()
-    cursor.execute('''
+    cursor.execute(f'''
     INSERT INTO tag_synonyms (from_tag, to_tag, creation_date, last_applied_date, applied_count)
-    VALUES (?, ?, ?, ?, ?)
+    VALUES ({PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER})
     ON CONFLICT(from_tag, to_tag) DO UPDATE SET 
         creation_date = excluded.creation_date, 
         last_applied_date = excluded.last_applied_date, 
@@ -121,8 +141,8 @@ def insert_user_data(conn, account_id, reputation, user_id, user_type, accept_ra
     Inserts user data into the SQLite database.
     """
     cursor = conn.cursor()
-    cursor.execute('''
-    INSERT INTO users (account_id, reputation, user_id, user_type, accept_rate, profile_image, display_name, link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    cursor.execute(f'''
+    INSERT INTO users (account_id, reputation, user_id, user_type, accept_rate, profile_image, display_name, link) VALUES ({PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER})
     ON CONFLICT(account_id) DO UPDATE SET 
         reputation = excluded.reputation, 
         user_id = excluded.user_id, 
@@ -140,9 +160,9 @@ def insert_question_data(conn, question_id, title, tags, owner_id, is_answered, 
     Inserts or updates question data into the SQLite database.
     """
     cursor = conn.cursor()
-    cursor.execute('''
+    cursor.execute(f'''
     INSERT INTO questions (question_id, title, tags, owner_id, is_answered, view_count, bounty_amount, bounty_closes_date, answer_count, score, last_activity_date, creation_date, last_edit_date, content_license, link, body, error) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES ({PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER})
     ON CONFLICT(question_id) DO UPDATE SET 
         title = excluded.title, 
         tags = excluded.tags, 
@@ -169,9 +189,9 @@ def insert_answer_data(conn, answer_id, question_id, owner_id, is_accepted, scor
     Inserts or updates answer data into the SQLite database.
     """
     cursor = conn.cursor()
-    cursor.execute('''
+    cursor.execute(f'''
     INSERT INTO answers (answer_id, question_id, owner_id, is_accepted, score, last_activity_date, last_edit_date, creation_date, content_license, body, error) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES ({PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER}, {PLACE_HOLDER})
     ON CONFLICT(answer_id) DO UPDATE SET 
         question_id = excluded.question_id,
         owner_id = excluded.owner_id,

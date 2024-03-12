@@ -1,8 +1,7 @@
 import os
-from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
+
+
 
 # Configuration settings for the application
 BASE_URL = 'https://api.stackexchange.com/2.3'

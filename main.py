@@ -1,28 +1,14 @@
+from dotenv import load_dotenv
 from colored import fg, attr
-from api import fetch_questions, fetch_popular_tags, fetch_all_tag_synonyms
-'''
-def main():
-    
-    tags = ['ui5']
-    pages = 1
-    questions = fetch_questions(tags, pages)
-    
-    for question_url, title, question_md in questions:
-        print(f"{question_url}\n----\n{title}\n----\n{question_md}\n")
-        
-    # Call the function to start fetching and storing tag data
-    #fetch_popular_tags()
-    
-    fetch_all_tag_synonyms()
-'''
+
 
 def main():
+    from api import fetch_questions, fetch_popular_tags, fetch_all_tag_synonyms
+    
     blue = fg('blue')
     green = fg('green')
     reset = attr('reset')
-    running = True
-
-    
+    running = True   
 
     while running:
         print(f"{blue}Welcome to the Stackoverflow CLI!")
@@ -56,4 +42,8 @@ def main():
             print(f"{green}Unknown command number. Please try again.{reset}")  
 
 if __name__ == '__main__':
+    # Load environment variables from .env file
+    load_dotenv()
+    
+    # show the main menu
     main()

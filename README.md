@@ -43,7 +43,16 @@ pip install html2text
 pip install bs4
 pip install python-dotenv
 pip install colored
+pip install psycopg2-binary
 ```
+
+## Configuration
+Copy and paste the `.env.example` file and rename the new file to `.env`. 
+Edit the `.env` file as following:
+1. Make a StackExchange application and copy and paste the application key as `APP_KEY`
+2. Make sure that you sellect the right DBMS type. If you want Sqlite the keep `SQLITE` otherwise if you want Postgres keep `POSTGRES`
+3. `DB_PATH` is needed for Sqlite and other `DB_*` attributes are needed for Postgres databases. 
+
 ## Run
 Run the `main.py` file to run the program. 
 ```
